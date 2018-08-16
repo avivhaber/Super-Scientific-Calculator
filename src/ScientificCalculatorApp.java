@@ -8,6 +8,7 @@ class ScientificCalculatorApp
         //System.out.println (ExpressionParser.countOccurrences ("()()()()(","("));
         System.out.println (s.nextInt()+1);
         System.out.println(Meme.xd());
+        System.out.println("pls");
     }
 }
     
