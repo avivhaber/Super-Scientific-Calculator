@@ -1,7 +1,10 @@
+package scicalc;
+
 class ExpressionParser
 {
     String infix;
     String postfix;
+    String nicememe;
     public ExpressionParser (String input) throws SyntaxException
     {
         infix=input;
