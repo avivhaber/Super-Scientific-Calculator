@@ -1,38 +1,134 @@
 package scicalc;
 
+import java.util.Stack;
+import java.util.List;
+import java.util.ArrayList;
+import java.lang.StringBuffer;
+
+//Expressions with many parenthesis are evaluated such that subexpressions that are deepest (inside the most parentheses) are evaluated first.
+//whenever the minus sign is used as a negative simply enclose it with parenthesis and add (0-1)* before it. The. Any non-operator plus signs can be deleted without consequence.
+//if there is are more "(" than ")", and they are otherwise balanced, simply add the required amount of ")" to the end.
 class ExpressionParser
 {
     String infix;
     String postfix;
-    String nicememe;
-    public ExpressionParser (String input) throws SyntaxException
+    List<Token> expression=new ArrayList<Token>();
+    
+    ExpressionParser (String input) throws SyntaxException
     {
         infix=input;
         detectErrors();
+    }
+    
+    boolean isNumeric (char ch, boolean includeConstants)
+    {
+        if (includeConstants)
+        {
+            return Character.isDigit(ch) || ch == '\u03c0' || ch == '\u212f' || ch == '.';
+        }
+        return Character.isDigit(ch) || ch == '.';
+    }
+    
+    void tokenize ()
+    {
+        int x;
+        for (x=0;x<infix.length();x++)
+        {
+            char current=infix.charAt(x);
+            if (!Character.isWhitespace(current))
+            {
+                if (isNumeric(current,false))
+                {
+                    x++;
+                    StringBuffer num=new StringBuffer();
+                    num.append(current);
+                    current=infix.charAt(x);
+                    while (x<infix.length() && isNumeric(current,false))
+                    {
+                        num.append (current);
+                        x++;
+                        current=infix.charAt(x);
+                    }
+                    x--;
+                    
+                    try
+                    {
+                        expression.add(new Operand(Double.parseDouble(num.toString())));
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        System.out.println("not a number idiot");
+                    }
+                }
+                else if (current=='+')
+                {
+                    expression.add(new Operator(Operator.OperatorType.ADDITION));
+                }
+                else if (current=='-')
+                {
+                    if (expression.size()==0 || !(expression.get(expression.size()-1) instanceof Operand) || !expression.get(expression.size()-1).toString().equals(")"))
+                    {
+                        expression.add(new Operator(Operator.OperatorType.NEGATION));
+                    }
+                    else
+                    {
+                        expression.add(new Operator(Operator.OperatorType.SUBTRACTION));
+                    }
+                }
+                else if (current=='*')
+                {
+                    expression.add(new Operator(Operator.OperatorType.MULTIPLICATION));
+                }
+                else if (current=='/')
+                {
+                    expression.add(new Operator(Operator.OperatorType.DIVISION));
+                }
+                else if (current=='^')
+                {
+                    expression.add(new Operator(Operator.OperatorType.EXPONENTATION));
+                }
+                else if (current=='!')
+                {
+                    expression.add(new Operator(Operator.OperatorType.FACTORIAL));
+                }
+                else if (current=='(')
+                {
+                    expression.add(new Symbol(Symbol.SymbolType.PARENTHESIS_LEFT));
+                }
+                else if (current==')')
+                {
+                    expression.add(new Symbol(Symbol.SymbolType.PARENTHESIS_RIGHT));
+                }
+            }
+        }
+    }
+    
+    void printlist ()
+    {
+        for (int x=0;x<expression.size();x++)
+        {
+            System.out.println (expression.get(x).toString());
+        }
     }
     
     /**
      * Detects easily identifiable input and syntax errors. Performed as an initial check.
      * Harder to find syntax errors are found while the expression is being parsed.
      */ 
-    public void detectErrors () throws SyntaxException
+    private void detectErrors () throws SyntaxException
     {
-        if (countOccurrences(infix,"(")!= countOccurrences(infix,")"))//checks if the number of left brackets equals the number of right brackets
+        if (!infix.matches(".*\\d+.*") && !infix.contains ("pi") && !infix.contains ("e"))//checks if the string actually contains any numbers or constants, using regex. I have no idea how this works, but it does. Don't question it.
         {
-            throw new SyntaxException ("Parenthesis Imbalance");
+            throw new SyntaxException ("No operands detected");
         }
-        else if (!infix.matches(".*\\d+.*") && !infix.contains ("pi") && !infix.contains ("e"))//checks if the string contains any numbers or constants. uses regex. i have no idea how this works, but it does. dont question it.
+        else if (infix.contains("()")) //Checks for any empty pair of parentheses.
         {
-            throw new SyntaxException ("Syntax Error");
-        }
-        else if (infix.contains("()"))
-        {
-            throw new SyntaxException ("Syntax Error");
+            throw new SyntaxException ("Empty parentheses");
         }
         //find consecutive operators
     }
     
-    public static int countOccurrences(String s, String sub)
+    static int countOccurrences(String s, String sub)
     {
         int count=0;
         int index=s.indexOf(sub);
@@ -43,18 +139,5 @@ class ExpressionParser
             index=s.indexOf(sub,index+1);
         }
         return count;
-    }
-    
-    public int getPrecedence (String token)
-    {
-        if (token.contains("sin")||token.contains("cos")||token.contains("tan")||token.contains("sin")||token.contains("log")||token.contains("ln"))
-        {
-            return 0;
-        }
-        if (token.equals("^")) return 1;
-        if (token.equals("#")) return 2;//# means abbreviated multiplication. ex. 1/2pi=1/2#pi
-        if (token.equals("*")||token.equals("/")) return 3;
-        if (token.equals("+")||token.equals("-")) return 4;
-        return -1; //abnormal output, indicates error
     }
 }
