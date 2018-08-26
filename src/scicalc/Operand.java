@@ -1,16 +1,31 @@
 package scicalc;
 
-class Operand implements Token
+class Operand
 {
-    double value;
+    private double value;
+    private boolean isConstant; //Stores whether the operand is a calculator supported constant, like pi and e.
+    private String representation;
     
     Operand (double value)
     {
         this.value=value;
+        this.representation=Double.toString(value);
+        this.isConstant=false;
     }
     
-    public String toString ()
+    Operand (ConstantDatabase constant)
     {
-        return Double.toString (value);
+        this.representation=constant.getRepresentation();
+        isConstant=true;
+    }
+    
+    boolean getIsConstant ()
+    {
+        return isConstant;
+    }
+    
+    public String toString()
+    {
+        return representation;
     }
 }

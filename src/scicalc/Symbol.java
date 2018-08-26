@@ -1,25 +1,30 @@
 package scicalc;
 
-class Symbol implements Token
+class Symbol
 {
-    enum SymbolType {PARENTHESIS_RIGHT, PARENTHESIS_LEFT};
-    SymbolType symbolType;
-    String representation;
+    enum SymbolType {PARENTHESIS_OPEN, PARENTHESIS_CLOSE};
+    private SymbolType symbolType;
+    private String representation;
     
     Symbol (SymbolType symbolType)
     {
         this.symbolType=symbolType;
-        if (symbolType==SymbolType.PARENTHESIS_LEFT)
+        if (symbolType==SymbolType.PARENTHESIS_OPEN)
         {
             representation="(";
         }
-        else if (symbolType==SymbolType.PARENTHESIS_RIGHT)
+        else if (symbolType==SymbolType.PARENTHESIS_CLOSE)
         {
             representation=")";
         }
     }
     
-    public String toString ()
+    SymbolType getSymbolType ()
+    {
+        return this.symbolType;
+    }
+    
+    public String toString()
     {
         return representation;
     }

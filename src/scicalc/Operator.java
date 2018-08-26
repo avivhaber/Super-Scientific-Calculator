@@ -1,71 +1,34 @@
 package scicalc;
 
 //implement abbreviated multiplication
-class Operator implements Token
+class Operator
 {
-    enum OperatorClass {BINARY_LEFT,BINARY_RIGHT,UNARY_PRE,UNARY_POST};
-    enum OperatorType {ADDITION, SUBTRACTION, MULTIPLICATION, DIVISION, EXPONENTATION, FACTORIAL, NEGATION};
-    OperatorClass operatorClass;
-    char representation;
-    int precedence; //higher precedence means it is carried out first
+    enum OperatorClass {BINARY_LEFT,BINARY_RIGHT,UNARY_PRE,UNARY_POST, FUNCTION};
+    private OperatorClass operatorClass;
+    private String representation;
+    private int precedence; //higher precedence means it is carried out first
     
-    Operator (OperatorClass operatorClass, char representation, int precedence)
+    Operator (OperatorClass operatorClass, String representation, int precedence)
     {
         this.operatorClass=operatorClass;
         this.representation=representation;
         this.precedence=precedence;
     }
     
-    Operator (OperatorType operatorType)
+    Operator (OperatorDatabase operatorType)
     {
-        if (operatorType==OperatorType.ADDITION)
-        {
-            operatorClass=OperatorClass.BINARY_LEFT;
-            representation='+';
-            precedence=5;
-        }
-        else if (operatorType==OperatorType.SUBTRACTION)
-        {
-            operatorClass=OperatorClass.BINARY_LEFT;
-            representation='-';
-            precedence=5;
-        }
-        else if (operatorType==OperatorType.MULTIPLICATION)
-        {
-            operatorClass=OperatorClass.BINARY_LEFT;
-            representation='*';
-            //representation='\u00d7'
-            precedence=10;
-        }
-        else if (operatorType==OperatorType.DIVISION)
-        {
-            operatorClass=OperatorClass.BINARY_LEFT;
-            representation='/';
-            //representation='\u00f7';
-            precedence=10;
-        }
-        else if (operatorType==OperatorType.EXPONENTATION)
-        {
-            operatorClass=OperatorClass.BINARY_RIGHT;
-            representation='^';
-            precedence=15;
-        }
-        else if (operatorType==OperatorType.FACTORIAL)
-        {
-            operatorClass=OperatorClass.UNARY_POST;
-            representation='!';
-            precedence=25;
-        }
-        else if (operatorType==OperatorType.NEGATION)
-        {
-            operatorClass=OperatorClass.UNARY_PRE;
-            representation='-';
-            precedence=20;
-        }
+        this.operatorClass=operatorType.getOperatorClass();
+        this.representation=operatorType.getRepresentation();
+        this.precedence=operatorType.getPrecedence();
+    }
+    
+    OperatorClass getOperatorClass()
+    {
+        return this.operatorClass;
     }
     
     public String toString()
     {
-        return Character.toString(representation);
+        return representation;
     }
 }

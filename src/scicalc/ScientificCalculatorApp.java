@@ -10,9 +10,14 @@ class ScientificCalculatorApp
         //System.out.println('\u221a');//sqrt
         //System.out.println('\u03c0');//pi
         Scanner sc=new Scanner (System.in);
-        ExpressionParser exp = new ExpressionParser(sc.next());
-        exp.tokenize();
-        exp.printlist();
+        ExpressionParser exp;
+        while (true)
+        {
+            exp = new ExpressionParser(sc.next());
+            exp.tokenize();
+            exp.insertAbbreviatedMultiplicationSigns();
+            exp.printlist();
+        }
     }
 }
     
