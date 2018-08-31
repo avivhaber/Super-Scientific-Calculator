@@ -13,10 +13,9 @@ class ScientificCalculatorApp
         ExpressionParser exp;
         while (true)
         {
-            exp = new ExpressionParser(sc.next());
-            exp.tokenize();
-            exp.insertAbbreviatedMultiplicationSigns();
-            exp.printlist();
+            exp = new ExpressionParser(sc.next(),true);
+            System.out.println(exp.getResult());
+            //exp.printlist();
         }
     }
 }

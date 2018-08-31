@@ -5,29 +5,56 @@ import java.util.List;
 import java.util.ArrayList;
 import java.lang.StringBuffer;
 
-//Expressions with many parenthesis are evaluated such that subexpressions that are deepest (inside the most parentheses) are evaluated first.
 //whenever the minus sign is used as a negative simply enclose it with parenthesis and add (0-1)* before it. The. Any non-operator plus signs can be deleted without consequence.
 //if there is are more "(" than ")", and they are otherwise balanced, simply add the required amount of ")" to the end.
 //insert abbr. mult symbols. cases: (4+4)(5+5), 1/2(4), 2log5,
+//get rid of useless operator class
 
 class ExpressionParser
 {
     private String infix;
-    private String postfix;
-    private List<Object> expression=new ArrayList<Object>();
+    private List<Object> expression;
+    private List<Object> postfix;
+    private boolean useDegrees;
     
-    ExpressionParser (String input) throws SyntaxException
+    ExpressionParser (String infix, boolean useDegrees)
     {
-        infix=input;
-        detectImmediateErrors();
+        this.infix=infix;
+        this.useDegrees=useDegrees;
+        expression=new ArrayList<Object>();
+        postfix=new ArrayList<Object>();
     }
     
-    boolean isNumeric (char ch)
+    void setInfix (String infix)
+    {
+        this.infix=infix;
+    }
+    
+    public boolean getUseDegrees()
+    {
+        return useDegrees;
+    }
+    
+    void setUseDegrees (boolean useDegrees)
+    {
+        this.useDegrees=useDegrees;
+    }
+    
+    double getResult () throws SyntaxException
+    {
+        detectImmediateErrors();
+        tokenize();
+        insertAbbreviatedMultiplicationSigns();
+        convertToPostfix();
+        return evaluatePostfix();
+    }
+    
+    private boolean isNumeric (char ch)
     {
         return Character.isDigit(ch) || ch == '.';
     }
     
-    void tokenize ()
+    private void tokenize ()
     {
         int x;
         for (x=0;x<infix.length();x++)
@@ -59,7 +86,7 @@ class ExpressionParser
                 
                 else if (current=='%')//Checks if the next token is a constant, since all constants are in the form "%abc;"
                 {
-                    expression.add(new Operand(ConstantDatabase.constantLookup.get(infix.substring(x,x+5))));
+                    expression.add(new Constant(ConstantDatabase.constantLookup.get(infix.substring(x,x+5))));
                     x+=4;
                 }
 
@@ -81,28 +108,148 @@ class ExpressionParser
                     {
                         if (isBinaryContext())
                         {
-                            expression.add(new Operator(OperatorDatabase.ADDITION));
+                            expression.add(OperatorDatabase.ADDITION);
                         }
                     }
                     else if (temp.equals(OperatorDatabase.SUBTRACTION.getRepresentation()))
                     {
                         if (isBinaryContext())
                         {
-                            expression.add(new Operator(OperatorDatabase.SUBTRACTION));
+                            expression.add(OperatorDatabase.SUBTRACTION);
                         }
                         else
                         {
-                            expression.add(new Operator(OperatorDatabase.NEGATION));
+                            expression.add(OperatorDatabase.NEGATION);
                         }
                     }
                     else //all other operators and functions
                     {
-                        expression.add(new Operator(OperatorDatabase.operatorLookup.get(temp)));
+                        expression.add(OperatorDatabase.operatorLookup.get(temp));
                     }
                     x+=4;
                 }
             }
         }
+    }
+   
+    //Uses an adapted shunting-yard algorithm to convert the infix expression to postfix.
+    private void convertToPostfix () throws SyntaxException
+    {
+        Stack<Object> operatorStack=new Stack<Object>();
+        
+        for (int x=0;x<expression.size();x++)
+        {
+            Object current=expression.get(x);
+            
+            if (current instanceof Operand || isUnaryPost(current))
+            {
+                postfix.add(current);
+            }
+            else if (isFunction(current) || isUnaryPre(current))
+            {
+                operatorStack.push(current);
+            }
+            else if (isBinaryLeft(current))
+            {
+                while (!operatorStack.isEmpty() && getPrecedence(operatorStack.peek())>=getPrecedence(current))
+                {
+                    postfix.add(operatorStack.pop());
+                }
+                operatorStack.push(current);
+            }
+            else if (isBinaryRight(current))
+            {
+                while (!operatorStack.isEmpty() && getPrecedence(operatorStack.peek())>getPrecedence(current))
+                {
+                    postfix.add(operatorStack.pop());
+                }
+                operatorStack.push(current);
+            }
+            else if (isOpenParenthesis(current))
+            {
+                operatorStack.push(current);
+            }
+            else if (isCloseParenthesis(current))
+            {
+                while (!isOpenParenthesis(operatorStack.peek()))
+                {
+                    postfix.add(operatorStack.pop());
+                    if (operatorStack.isEmpty())
+                    {
+                        throw new SyntaxException("Parentheses mismatch");
+                    }
+                }
+                operatorStack.pop();
+                if (isFunction(operatorStack.peek()))
+                {
+                    postfix.add(operatorStack.pop());
+                }
+            }
+        }
+        while (!operatorStack.isEmpty())
+        {
+            if (isOpenParenthesis(operatorStack.peek()))
+            {
+                throw new SyntaxException("Parentheses mismatch");
+            }
+            postfix.add(operatorStack.pop());
+        }
+    }
+    
+    private double evaluatePostfix () throws SyntaxException
+    {
+        Stack<Double> postfixStack = new Stack<Double>();
+        MathEvaluator evaluator = new MathEvaluator(useDegrees);
+        
+        for (int x=0; x<postfix.size(); x++)
+        {
+            Object current = postfix.get(x);
+            if (current instanceof Operand)
+            {
+                postfixStack.push(((Operand)current).getValue());
+            }
+            else if (current instanceof OperatorDatabase)
+            {
+                if (isUnaryPre(current) || isUnaryPost(current) || isFunction(current))
+                {
+                    if (postfixStack.isEmpty())
+                    {
+                        throw new SyntaxException("No operands left to perform operation");
+                    }
+                    else
+                    {
+                        postfixStack.push(evaluator.evaluate((OperatorDatabase)current,postfixStack.pop()));
+                    }
+                }
+                else if (isBinaryLeft(current) || isBinaryRight(current))
+                {
+                    if (postfixStack.size()<2)
+                    {
+                        throw new SyntaxException("No operands left to perform operation");
+                    }
+                    else
+                    {
+                        double temp = postfixStack.pop();
+                        postfixStack.push(evaluator.evaluate((OperatorDatabase) current,postfixStack.pop(),temp));
+                    }
+                }
+                else
+                {
+                    throw new SyntaxException("Unexpected operator class in postfix list");
+                }
+            }
+            else
+            {
+                throw new SyntaxException("Unexpected object object in postfix list:" + current.toString());
+            }
+        }
+        
+        if (postfixStack.size()>1)
+        {
+            throw new SyntaxException("More than one object remaining on stack:" + postfixStack.peek().toString());
+        }
+        
+        return postfixStack.pop();
     }
     
     void printlist ()
@@ -111,8 +258,66 @@ class ExpressionParser
         {
             System.out.println (expression.get(x).toString());
         }
+        System.out.println ();
+        for (int x=0;x<postfix.size();x++)
+        {
+            System.out.println (postfix.get(x).toString());
+        }
     }
     
+    private boolean isBinaryLeft (Object o)
+    {
+        return (o instanceof OperatorDatabase && ((OperatorDatabase) o).getOperatorClass()== OperatorDatabase.OperatorClass.BINARY_LEFT);
+    }
+    
+    private boolean isBinaryRight (Object o)
+    {
+        return (o instanceof OperatorDatabase && ((OperatorDatabase) o).getOperatorClass()== OperatorDatabase.OperatorClass.BINARY_RIGHT);
+    }
+    
+    private boolean isUnaryPre (Object o)
+    {
+        return (o instanceof OperatorDatabase && ((OperatorDatabase) o).getOperatorClass()== OperatorDatabase.OperatorClass.UNARY_PRE);
+    }
+    
+    private boolean isUnaryPost (Object o)
+    {
+        return (o instanceof OperatorDatabase && ((OperatorDatabase) o).getOperatorClass()== OperatorDatabase.OperatorClass.UNARY_POST);
+    }
+    
+    private boolean isFunction(Object o)
+    {
+        return (o instanceof OperatorDatabase && ((OperatorDatabase) o).getOperatorClass()== OperatorDatabase.OperatorClass.FUNCTION);
+    }
+    
+    private boolean isOpenParenthesis (Object o)
+    {
+        return (o instanceof Symbol && ((Symbol) o).getSymbolType()== Symbol.SymbolType.PARENTHESIS_OPEN);
+    }
+    
+    private boolean isCloseParenthesis (Object o)
+    {
+        return (o instanceof Symbol && ((Symbol) o).getSymbolType()== Symbol.SymbolType.PARENTHESIS_CLOSE);
+    }
+    
+    private boolean isConstant (Object o)
+    {
+        return o instanceof Constant;
+    }
+    
+    private boolean isNumber (Object o)
+    {
+        return o instanceof Operand;
+    }
+    
+    private int getPrecedence (Object o)
+    {
+        if (o instanceof OperatorDatabase)
+        {
+            return ((OperatorDatabase) o).getPrecedence();
+        }
+        return -1;
+    }
     
     private boolean isBinaryContext ()
     {
@@ -122,11 +327,8 @@ class ExpressionParser
         }
         
         Object previous=expression.get(expression.size()-1);
-        boolean condition1=previous instanceof Operand;
-        boolean condition2=previous instanceof Symbol && ((Symbol) previous).getSymbolType()==Symbol.SymbolType.PARENTHESIS_CLOSE;
-        boolean condition3=previous instanceof Operator && ((Operator) previous).getOperatorClass()== Operator.OperatorClass.UNARY_POST;
         
-        return condition1 || condition2 || condition3;
+        return previous instanceof Operand || isCloseParenthesis(previous) || isUnaryPost(previous);
     }
     
     /**
@@ -135,7 +337,7 @@ class ExpressionParser
      */ 
     private void detectImmediateErrors () throws SyntaxException
     {
-        if (infix.contains("()")) //Checks for any empty pair of parentheses.
+        if (infix.contains("()") || infix.charAt(infix.length()-1)=='(') //Checks for any empty pair of parentheses.
         {
             throw new SyntaxException ("Empty parentheses");
         }
@@ -153,49 +355,33 @@ class ExpressionParser
         }
     }
     
-    void insertAbbreviatedMultiplicationSigns ()
+    private void insertAbbreviatedMultiplicationSigns ()
     {
         for (int x=expression.size()-1; x>0; x--)
         {
             Object current=expression.get(x);
             Object previous=expression.get(x-1);
-    
-            //System.out.println ("nice1");
-            if (current instanceof Symbol && ((Symbol) current).getSymbolType()==Symbol.SymbolType.PARENTHESIS_OPEN)
+            
+            if (isOpenParenthesis(current) || isFunction(current))
             {
-                if
-                (previous instanceof Operand
-                || (previous instanceof Operator && ((Operator) previous).getOperatorClass()== Operator.OperatorClass.UNARY_POST)
-                || (previous instanceof Symbol && ((Symbol) previous).getSymbolType()==Symbol.SymbolType.PARENTHESIS_CLOSE))
+                if (previous instanceof Operand || isUnaryPost(previous) || isCloseParenthesis(previous))
                 {
-                    expression.add (x,new Operator(OperatorDatabase.MULTIPLICATION_ABBREVIATED_LOW));
+                    expression.add (x,OperatorDatabase.MULTIPLICATION_ABBREVIATED_LOW);
                 }
             }
-            if (current instanceof Operator && ((Operator) current).getOperatorClass()==Operator.OperatorClass.FUNCTION)
-            {
-                if
-                (previous instanceof Operand
-                || (previous instanceof Symbol && ((Symbol) previous).getSymbolType()==Symbol.SymbolType.PARENTHESIS_CLOSE)
-                || (previous instanceof Operator && ((Operator) previous).getOperatorClass()== Operator.OperatorClass.UNARY_POST))
-                {
-                    expression.add (x,new Operator(OperatorDatabase.MULTIPLICATION_ABBREVIATED_LOW));
-                }
-            }
-            if (previous instanceof Symbol && ((Symbol) previous).getSymbolType()==Symbol.SymbolType.PARENTHESIS_CLOSE)
+            if (isCloseParenthesis(previous))
             {
                 if (current instanceof Operand)
                 {
-                    expression.add (x,new Operator(OperatorDatabase.MULTIPLICATION_ABBREVIATED_LOW));
+                    expression.add (x,OperatorDatabase.MULTIPLICATION_ABBREVIATED_LOW);
                 }
             }
             
-            if (current instanceof Operand && ((Operand)current).getIsConstant())
+            if (isConstant(current))
             {
-                if
-                (previous instanceof Operand
-                || (previous instanceof Operator && ((Operator) previous).getOperatorClass()== Operator.OperatorClass.UNARY_POST))
+                if (previous instanceof Operand || isUnaryPost(previous))
                 {
-                    expression.add (x,new Operator(OperatorDatabase.MULTIPLICATION_ABBREVIATED_HIGH));
+                    expression.add (x,OperatorDatabase.MULTIPLICATION_ABBREVIATED_HIGH);
                 }
             }
         }

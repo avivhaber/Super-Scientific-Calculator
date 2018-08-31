@@ -24,7 +24,7 @@ class Symbol
         return this.symbolType;
     }
     
-    public String toString()
+    public String toString ()
     {
         return representation;
     }

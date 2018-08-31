@@ -3,29 +3,29 @@ package scicalc;
 class Operand
 {
     private double value;
-    private boolean isConstant; //Stores whether the operand is a calculator supported constant, like pi and e.
-    private String representation;
     
     Operand (double value)
     {
         this.value=value;
-        this.representation=Double.toString(value);
-        this.isConstant=false;
     }
     
-    Operand (ConstantDatabase constant)
+    Operand ()
     {
-        this.representation=constant.getRepresentation();
-        isConstant=true;
+        this.value=Double.NaN;
     }
     
-    boolean getIsConstant ()
+    double getValue ()
     {
-        return isConstant;
+        return value;
     }
     
-    public String toString()
+    void setValue (double value)
     {
-        return representation;
+        this.value=value;
+    }
+    
+    public String toString ()
+    {
+        return Double.toString(value);
     }
 }
