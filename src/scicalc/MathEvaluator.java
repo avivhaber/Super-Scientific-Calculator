@@ -1,5 +1,7 @@
 package scicalc;
 
+import java.math.BigDecimal;
+
 public class MathEvaluator
 {
     private boolean useDegrees;
@@ -19,6 +21,40 @@ public class MathEvaluator
     void setUseDegrees (boolean useDegrees)
     {
         this.useDegrees=useDegrees;
+    }
+    
+    public static int numDecimals (double num)
+    {
+        String s=Double.toString(num);
+        int i=s.indexOf(".");
+        if (i==-1)
+        {
+            return 0;
+        }
+        return s.length()-(i+1);
+    }
+    
+    //Method taken from Commons-Math Precision class
+    public static double round(double x, int scale, int roundingMethod)
+    {
+        final double POSITIVE_ZERO=0d;
+        try
+        {
+            final double rounded = (new BigDecimal(Double.toString(x)).setScale(scale, roundingMethod)).doubleValue();
+            // MATH-1089: negative values rounded to zero should result in negative zero
+            return rounded == POSITIVE_ZERO ? POSITIVE_ZERO * x : rounded;
+        }
+        catch (NumberFormatException e)
+        {
+            if (Double.isInfinite(x))
+            {
+                return x;
+            }
+            else
+            {
+                return Double.NaN;
+            }
+        }
     }
     
     private double factorial (double n)
@@ -187,6 +223,10 @@ public class MathEvaluator
         }
         else if (operator==OperatorDatabase.EXPONENTIATION)
         {
+            if (arg1==Math.E)
+            {
+                return Math.exp(arg2);
+            }
             return Math.pow (arg1,arg2);
         }
         else

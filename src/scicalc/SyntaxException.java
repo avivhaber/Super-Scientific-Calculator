@@ -1,6 +1,6 @@
 package scicalc;
 
-class SyntaxException extends Exception
+public class SyntaxException extends Exception
 {
     boolean syntax=false;
     

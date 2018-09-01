@@ -10,14 +10,14 @@ import java.lang.StringBuffer;
 //insert abbr. mult symbols. cases: (4+4)(5+5), 1/2(4), 2log5,
 //get rid of useless operator class
 
-class ExpressionParser
+public class ExpressionParser
 {
     private String infix;
     private List<Object> expression;
     private List<Object> postfix;
     private boolean useDegrees;
     
-    ExpressionParser (String infix, boolean useDegrees)
+    public ExpressionParser (String infix, boolean useDegrees)
     {
         this.infix=infix;
         this.useDegrees=useDegrees;
@@ -40,7 +40,7 @@ class ExpressionParser
         this.useDegrees=useDegrees;
     }
     
-    double getResult () throws SyntaxException
+    public double getResult () throws SyntaxException
     {
         detectImmediateErrors();
         tokenize();
@@ -180,7 +180,7 @@ class ExpressionParser
                     }
                 }
                 operatorStack.pop();
-                if (isFunction(operatorStack.peek()))
+                if (!operatorStack.isEmpty() && isFunction(operatorStack.peek()))
                 {
                     postfix.add(operatorStack.pop());
                 }
