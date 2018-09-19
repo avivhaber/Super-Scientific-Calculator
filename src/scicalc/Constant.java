@@ -1,7 +1,7 @@
 package scicalc;
 
 //Essentially just a wrapper class for ConstantDatabase. Was made because enumerations cannot act as subclasses.
-class Constant extends Operand
+public class Constant extends Operand
 {
     ConstantDatabase constant;
     

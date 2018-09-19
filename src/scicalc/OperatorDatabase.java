@@ -3,7 +3,7 @@ package scicalc;
 import java.util.HashMap;
 
 //each operator and function's string representation is a lowercase 3 character code enclosed between '&' and ';'. This consistent format must be kept for the parser to work.
-enum OperatorDatabase
+public enum OperatorDatabase
 {
     ADDITION (OperatorClass.BINARY_LEFT, "&add;", "+", 5),
     SUBTRACTION (OperatorClass.BINARY_LEFT, "&sub;", "-", 5),
