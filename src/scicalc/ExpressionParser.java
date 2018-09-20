@@ -25,9 +25,21 @@ public class ExpressionParser
         postfix=new ArrayList<Object>();
     }
     
-    void setInfix (String infix)
+    public ExpressionParser (boolean useDegrees)
+    {
+        this.useDegrees=useDegrees;
+        expression=new ArrayList<Object>();
+        postfix=new ArrayList<Object>();
+    }
+    
+    public void setInfix (String infix)
     {
         this.infix=infix;
+    }
+    
+    public String getInfix()
+    {
+        return infix;
     }
     
     public boolean getUseDegrees()
@@ -49,13 +61,14 @@ public class ExpressionParser
         return evaluatePostfix();
     }
     
-    private boolean isNumeric (char ch)
+    public static boolean isNumeric (char ch)
     {
         return Character.isDigit(ch) || ch == '.';
     }
     
     private void tokenize ()
     {
+        expression.clear();
         int x;
         for (x=0;x<infix.length();x++)
         {
@@ -111,7 +124,7 @@ public class ExpressionParser
                             expression.add(OperatorDatabase.ADDITION);
                         }
                     }
-                    else if (temp.equals(OperatorDatabase.SUBTRACTION.getRepresentation()))
+                    else if (temp.equals(OperatorDatabase.NEGATION.getRepresentation()))
                     {
                         if (isBinaryContext())
                         {
@@ -135,6 +148,7 @@ public class ExpressionParser
     //Uses an adapted shunting-yard algorithm to convert the infix expression to postfix.
     private void convertToPostfix () throws SyntaxException
     {
+        postfix.clear();
         Stack<Object> operatorStack=new Stack<Object>();
         
         for (int x=0;x<expression.size();x++)
@@ -246,6 +260,7 @@ public class ExpressionParser
         
         if (postfixStack.size()>1)
         {
+            System.out.println(postfixStack.pop()+" "+postfixStack.pop());
             throw new SyntaxException("More than one object remaining on stack:" + postfixStack.peek().toString());
         }
         

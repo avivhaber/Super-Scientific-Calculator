@@ -1,15 +1,15 @@
 package scicalc;
 
-class Operand
+public class Operand
 {
     private double value;
     
-    Operand (double value)
+    public Operand (double value)
     {
         this.value=value;
     }
     
-    Operand ()
+    public Operand ()
     {
         this.value=Double.NaN;
     }

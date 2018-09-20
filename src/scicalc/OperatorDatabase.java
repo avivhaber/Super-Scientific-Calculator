@@ -40,7 +40,7 @@ public enum OperatorDatabase
     
     enum OperatorClass {BINARY_LEFT,BINARY_RIGHT,UNARY_PRE,UNARY_POST, FUNCTION};
     
-    static HashMap<String,OperatorDatabase> operatorLookup=new HashMap<String,OperatorDatabase>();
+    public static HashMap<String,OperatorDatabase> operatorLookup=new HashMap<String,OperatorDatabase>();
     
     static
     {
@@ -63,7 +63,7 @@ public enum OperatorDatabase
         return this.operatorClass;
     }
     
-    String getRepresentation ()
+    public String getRepresentation ()
     {
         return this.representation;
     }

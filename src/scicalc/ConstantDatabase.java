@@ -3,7 +3,7 @@ package scicalc;
 import java.util.HashMap;
 
 //each constant's string representation is a lowercase 3 character code enclosed between '%' and ';'. This consistent format must be kept for the parser to work.
-enum ConstantDatabase
+public enum ConstantDatabase
 {
     VARIABLE_X ("%var;", "x", 1),
     ANSWER ("%ans;", "Ans", 0),
