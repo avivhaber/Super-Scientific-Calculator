@@ -27,7 +27,7 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
     SuperScientificCalculatorFrame ()
     {
         super("Super Scientific Calculator");
-        setSize(500, 500);
+        setSize(1000, 500);
         setLocationRelativeTo(null); //centers frame
         setLayout(new FlowLayout());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -124,8 +124,8 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
         }
         else if (e.getSource().equals(backspace) && field.getCaretPosition()>0)
         {
-            field.setText(field.getText().substring(0,field.getCaretPosition()-1)+field.getText().substring(field.getCaretPosition()));
-            field.getCaret().setVisible(true);
+            //field.setText(field.getText().substring(0,field.getCaretPosition()-1)+field.getText().substring(field.getCaretPosition()));
+            //field.getCaret().setVisible(true);
         }
     }
     
