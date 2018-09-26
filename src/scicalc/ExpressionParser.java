@@ -66,6 +66,7 @@ public class ExpressionParser
         return Character.isDigit(ch) || ch == '.';
     }
     
+    
     private void tokenize ()
     {
         expression.clear();
@@ -115,7 +116,6 @@ public class ExpressionParser
                 else if (current=='&')//Checks if the next token is an operator, since all operators are in the form "&abc;"
                 {
                     String temp=infix.substring(x,x+5);
-                    
                     //special checks must be performed for + and - since they can be used in both a binary and unary context.
                     if (temp.equals(OperatorDatabase.ADDITION.getRepresentation()))
                     {
@@ -124,7 +124,7 @@ public class ExpressionParser
                             expression.add(OperatorDatabase.ADDITION);
                         }
                     }
-                    else if (temp.equals(OperatorDatabase.NEGATION.getRepresentation()))
+                    else if (temp.equals(OperatorDatabase.SUBTRACTION.getRepresentation()))
                     {
                         if (isBinaryContext())
                         {
@@ -266,6 +266,8 @@ public class ExpressionParser
         
         return postfixStack.pop();
     }
+    
+    //public void
     
     void printlist ()
     {
