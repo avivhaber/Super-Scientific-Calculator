@@ -16,6 +16,9 @@ public enum OperatorDatabase
     SINE (OperatorClass.FUNCTION, "&sin;", "sin", 20),
     COSINE (OperatorClass.FUNCTION, "&cos;", "cos", 20),
     TANGENT (OperatorClass.FUNCTION, "&tan;", "tan", 20),
+    
+    ABSOLUTE (OperatorClass.FUNCTION, "&abs;", "abs", 20),
+    
     ARC_SINE (OperatorClass.FUNCTION, "&asn;", "sin\u207b\u00b9", 20),
     ARC_COSINE (OperatorClass.FUNCTION, "&acs;", "cos\u207b\u00b9", 20),
     ARC_TANGENT (OperatorClass.FUNCTION, "&atn;", "tan\u207b\u00b9", 20),
@@ -24,14 +27,14 @@ public enum OperatorDatabase
     SQUARE_ROOT (OperatorClass.FUNCTION, "&srt;", "\u221a", 20),
     CUBE_ROOT (OperatorClass.FUNCTION, "&crt;", "\u221b", 20),
     GAMMA (OperatorClass.FUNCTION, "&gam;", "\u0393", 20),
-    ABSOLUTE (OperatorClass.FUNCTION, "&abs;", "abs", 20),
+    
     
     MULTIPLICATION_ABBREVIATED_HIGH (OperatorClass.BINARY_LEFT, "&amh;", "#", 25), //used before constants and variables. ex: 4pi->4#pi
     EXPONENTIATION (OperatorClass.BINARY_RIGHT, "&exp;", "^", 30),
     FACTORIAL (OperatorClass.UNARY_POST, "&fac;", "!", 35),
-    RECIPROCAL (OperatorClass.UNARY_POST, "&rcl;", "\u207b\u00b9", 35),
-    SQUARE (OperatorClass.UNARY_POST, "&sqr;", "\u00b2", 35),
-    CUBE (OperatorClass.UNARY_POST, "&cub;", "\u00b3", 35);
+    RECIPROCAL (OperatorClass.UNARY_POST, "&rcl;", "x \u207b\u00b9", 35),
+    SQUARE (OperatorClass.UNARY_POST, "&sqr;", "x\u00b2", 35),
+    CUBE (OperatorClass.UNARY_POST, "&cub;", "x\u00b3", 35);
     
     private OperatorClass operatorClass;
     private String representation;

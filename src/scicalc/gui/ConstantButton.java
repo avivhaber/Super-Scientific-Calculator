@@ -1,14 +1,15 @@
 package scicalc.gui;
 
 import javax.swing.JButton;
-import scicalc.Constant;
+import scicalc.ConstantDatabase;
+import scicalc.ConstantDatabase;
 
 //literally just a jbutton with a constant
 public class ConstantButton extends JButton
 {
-    Constant constant;
+    ConstantDatabase constant;
     
-    ConstantButton (String text, Constant constant)
+    ConstantButton (String text, ConstantDatabase constant)
     {
         super (text);
         this.constant=constant;

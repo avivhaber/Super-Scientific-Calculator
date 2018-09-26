@@ -1,7 +1,10 @@
 package scicalc.gui;
 
+import scicalc.ConstantDatabase;
 import scicalc.OperatorDatabase;
 import scicalc.ExpressionParser;
+import scicalc.Constant;
+import scicalc.ConstantDatabase;
 import scicalc.Operand;
 
 import javax.swing.*;
@@ -43,6 +46,9 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
     private FunctionButton sub;
     private JButton ans;
     
+    private ConstantButton pi;
+    private ConstantButton euler;
+    
     private boolean pressedEquals;
     private double answer;
     
@@ -54,7 +60,7 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
     SuperScientificCalculatorFrame ()
     {
         super("SuperSci");
-        FlowLayout lay=new FlowLayout(FlowLayout.CENTER,20,100);
+        FlowLayout lay=new FlowLayout(FlowLayout.LEFT,20,100);
         setLayout(lay);
         
         pressedEquals=false;
@@ -73,7 +79,8 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
         fieldFont=new Font(null,Font.PLAIN,14);
         contents=new ArrayList<Object>();
         
-        field=new JTextField(22);
+        field=new JTextField(24);
+        field.setBackground(Color.WHITE);
         bar=new JMenuBar();
         file=new JMenu("File");
         quit=new JMenuItem("Quit");
@@ -82,7 +89,7 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
         
         primaryButtonPanel=new JPanel(new FlowLayout());
         secondaryButtonPanel=new JPanel(new FlowLayout());
-        tertiaryButtonPanel=new JPanel(new FlowLayout());
+        tertiaryButtonPanel=new JPanel(new FlowLayout(FlowLayout.LEFT));
         
         primaryButtonPanel.setPreferredSize(new Dimension(132, 200));
         secondaryButtonPanel.setPreferredSize(new Dimension(116,200));
@@ -100,6 +107,9 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
         div=new FunctionButton(OperatorDatabase.DIVISION.toString(),OperatorDatabase.DIVISION);
         add=new FunctionButton(OperatorDatabase.ADDITION.toString(),OperatorDatabase.ADDITION);
         sub=new FunctionButton(OperatorDatabase.SUBTRACTION.toString(),OperatorDatabase.SUBTRACTION);
+        
+        pi=new ConstantButton(ConstantDatabase.PI.toString(),ConstantDatabase.PI);
+        euler=new ConstantButton(ConstantDatabase.E.toString(),ConstantDatabase.E);
         
         for (int x=0;x<numberButtons.length;x++)
         {
@@ -123,6 +133,7 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
             {
                 functionButtons[i] = new FunctionButton(od.toString(), od);
                 functionButtons[i].addActionListener(this);
+                functionButtons[i].setPreferredSize(new Dimension(63,25));
                 i++;
             }
         }
@@ -138,11 +149,9 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
         
         bar.add(file);
         
-        tertiaryButtonPanel.add(field);
-        tertiaryButtonPanel.add(backspace);
+        add(field);
+        //tertiaryButtonPanel.add(backspace);
         //tertiaryButtonPanel.add(printCode);
-        tertiaryButtonPanel.add(openBracketButton);
-        tertiaryButtonPanel.add(closeBracketButton);
         
         for (int x=numberButtons.length-1;x>=1;x-=3)
         {
@@ -154,6 +163,20 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
         primaryButtonPanel.add(decimalPointButton);
         
         secondaryButtonPanel.add(backspace);
+    
+        clear.setPreferredSize(new Dimension(53,25));
+        equalsButton.setPreferredSize(new Dimension(53,25));
+        ans.setPreferredSize(new Dimension(53,25));
+        mult.setPreferredSize(new Dimension(53,25));
+        div.setPreferredSize(new Dimension(53,25));
+        add.setPreferredSize(new Dimension(53,25));
+        sub.setSize(new Dimension(53,25));
+        sub.setPreferredSize(new Dimension(53,25));
+        
+        openBracketButton.setPreferredSize(new Dimension(46,25));
+        closeBracketButton.setPreferredSize(new Dimension(46,25));
+        pi.setPreferredSize(new Dimension(46,25));
+        euler.setPreferredSize(new Dimension(46, 25));
         
         secondaryButtonPanel.add(clear);
         secondaryButtonPanel.add(mult);
@@ -168,6 +191,10 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
         {
             tertiaryButtonPanel.add(functionButtons[x]);
         }
+        tertiaryButtonPanel.add(openBracketButton);
+        tertiaryButtonPanel.add(closeBracketButton);
+        tertiaryButtonPanel.add(pi);
+        tertiaryButtonPanel.add(euler);
         
         add (tertiaryButtonPanel);
         add(primaryButtonPanel);
@@ -187,21 +214,12 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
         add.addActionListener(this);
         sub.addActionListener(this);
         ans.addActionListener(this);
+        pi.addActionListener(this);
+        euler.addActionListener(this);
     
         
         setJMenuBar(bar);
         setVisible(true);
-    
-        clear.setPreferredSize(backspace.getSize());
-        equalsButton.setPreferredSize(backspace.getSize());
-        ans.setPreferredSize(backspace.getSize());
-        mult.setPreferredSize(backspace.getSize());
-        div.setPreferredSize(backspace.getSize());
-        add.setPreferredSize(backspace.getSize());
-        sub.setSize(backspace.getSize());
-        sub.setPreferredSize(backspace.getSize());
-        revalidate();
-        repaint();
     }
     
     public void actionPerformed (ActionEvent e)
@@ -230,9 +248,25 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
             }
             //int temp=field.getCaretPosition();
             effectiveString.append(((FunctionButton) e.getSource()).function.getRepresentation());
-            field.setText(field.getText()+((FunctionButton) e.getSource()).function.toString());
+            String temp=((FunctionButton) e.getSource()).function.toString();
+            temp=temp.replaceAll("x","");//terrible solution, please fix
+            field.setText(field.getText()+temp);
             field.getCaret().setVisible(true);
             
+        }
+        if (e.getSource() instanceof ConstantButton)
+        {
+            if (pressedEquals)
+            {
+                clearField();
+                pressedEquals=false;
+            }
+            //int temp=field.getCaretPosition();
+            effectiveString.append(((ConstantButton) e.getSource()).constant.getRepresentation());
+            String temp=((ConstantButton) e.getSource()).constant.toString();
+            field.setText(field.getText()+temp);
+            field.getCaret().setVisible(true);
+        
         }
         else if (e.getSource().equals(quit))
         {
@@ -310,14 +344,22 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
             try
             {
                 double d=parser.getResult();
-                answer=d;
-                field.setText(Double.toString(d));
-                effectiveString.delete(0,effectiveString.length());
-                effectiveString.append(d);
+                if (d!=Double.NaN)
+                {
+                    answer = d;
+                    field.setText(Double.toString(d));
+                    effectiveString.delete(0, effectiveString.length());
+                    effectiveString.append(d);
+                }
+                else
+                {
+                    answer=0;
+                    field.setText("Math Error");
+                }
             }
             catch (Exception ex)
             {
-                field.setText(ex.getMessage());
+                field.setText("Syntax Error");
                 answer=0;
             }
         }
@@ -335,7 +377,6 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
         else if (text.charAt(pos-1)==';')
         {
             effectiveString.delete(effectiveString.length()-5,effectiveString.length());
-            System.out.println (effectiveString);
             field.setText(field.getText().substring(0,field.getText().length()-OperatorDatabase.operatorLookup.get(text.substring(text.length()-5)).toString().length()));//im so sorry about this line
         }
     }

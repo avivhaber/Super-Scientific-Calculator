@@ -36,7 +36,7 @@ public enum ConstantDatabase
         this.value=value;
     }
     
-    String getRepresentation()
+    public String getRepresentation()
     {
         return this.representation;
     }
