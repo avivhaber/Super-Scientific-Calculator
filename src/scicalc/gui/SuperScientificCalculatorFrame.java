@@ -7,9 +7,12 @@ import scicalc.Constant;
 import scicalc.ConstantDatabase;
 import scicalc.Operand;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 class SuperScientificCalculatorFrame extends JFrame implements ActionListener, FocusListener
@@ -72,7 +75,15 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
         setLocationRelativeTo(null); //centers frame
         setLayout(new FlowLayout());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setIconImage (new ImageIcon ("res/icon_128x128.png").getImage()); //image taken from https://freeiconshop.com/icon/calculator-icon-flat/);
+        try
+        {
+            InputStream is=this.getClass().getClassLoader().getResourceAsStream("res/icon_128x128.png");
+            setIconImage(ImageIO.read(is));
+        }
+        catch (IOException e)
+        {
+            System.out.print ("icon loading failed");
+        }
         
         parser=new ExpressionParser(true);
         effectiveString= new StringBuffer();
@@ -355,6 +366,7 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
                 {
                     answer=0;
                     field.setText("Math Error");
+                    //doesnt work
                 }
             }
             catch (Exception ex)
