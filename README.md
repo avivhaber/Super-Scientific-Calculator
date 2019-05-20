@@ -1,4 +1,5 @@
 # Super-Scientific-Calculator
-A scientific calculator app written in Java using Swing. To try, simply run SuperSci.jar
+A scientific calculator app written in Java using Swing. Supports complex expressions and exact calculations with fractions.
+To try, simply run SuperSci.jar
 
-![screenshot](https://raw.githubusercontent.com/avivh72/Super-Scientific-Calculator/master/src/res/screenshot.jpg)
+![screenshot](https://raw.githubusercontent.com/avivhaber/Super-Scientific-Calculator/master/src/res/demo.png)
