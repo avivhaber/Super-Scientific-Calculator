@@ -52,7 +52,7 @@ public class ExpressionParser
         this.useDegrees=useDegrees;
     }
     
-    public double getResult () throws SyntaxException
+    public Operand getResult () throws SyntaxException
     {
         detectImmediateErrors();
         tokenize();
@@ -210,17 +210,26 @@ public class ExpressionParser
         }
     }
     
-    private double evaluatePostfix () throws SyntaxException
+    private Operand evaluatePostfix () throws SyntaxException
     {
-        Stack<Double> postfixStack = new Stack<Double>();
+        Stack<Operand> postfixStack = new Stack<Operand>();
         MathEvaluator evaluator = new MathEvaluator(useDegrees);
-        
+        boolean validFraction=true;
         for (int x=0; x<postfix.size(); x++)
         {
             Object current = postfix.get(x);
             if (current instanceof Operand)
             {
-                postfixStack.push(((Operand)current).getValue());
+                double temp = ((Operand) current).getValue();
+                try
+                {
+                    Fraction frac = Fraction.toFraction(temp);
+                    postfixStack.push(frac);
+                }
+                catch (Exception e)
+                {
+                    postfixStack.push(new Operand(temp));
+                }
             }
             else if (current instanceof OperatorDatabase)
             {
@@ -232,7 +241,15 @@ public class ExpressionParser
                     }
                     else
                     {
-                        postfixStack.push(evaluator.evaluate((OperatorDatabase)current,postfixStack.pop()));
+                        if (isFractionSupported(current) && (postfixStack.peek() instanceof Fraction))
+                        {
+                            postfixStack.push(evaluator.evaluateFraction((OperatorDatabase) current,(Fraction)postfixStack.pop()));
+                        }
+                        else
+                        {
+                            double result=evaluator.evaluate((OperatorDatabase) current, postfixStack.pop().getValue());
+                            postfixStack.push(new Operand(result));
+                        }
                     }
                 }
                 else if (isBinaryLeft(current) || isBinaryRight(current))
@@ -243,8 +260,17 @@ public class ExpressionParser
                     }
                     else
                     {
-                        double temp = postfixStack.pop();
-                        postfixStack.push(evaluator.evaluate((OperatorDatabase) current,postfixStack.pop(),temp));
+                        Operand arg2 = postfixStack.pop();
+    
+                        if (isFractionSupported(current) && (postfixStack.peek() instanceof Fraction) && (arg2 instanceof Fraction))
+                        {
+                            postfixStack.push(evaluator.evaluateFraction((OperatorDatabase) current,(Fraction)postfixStack.pop(),(Fraction)arg2));
+                        }
+                        else
+                        {
+                            double result=evaluator.evaluate((OperatorDatabase) current, postfixStack.pop().getValue(),arg2.getValue());
+                            postfixStack.push(new Operand(result));
+                        }
                     }
                 }
                 else
@@ -280,6 +306,14 @@ public class ExpressionParser
         {
             System.out.println (postfix.get(x).toString());
         }
+    }
+    
+    private boolean isFractionSupported (Object o)
+    {
+        if (! (o instanceof  OperatorDatabase)) return false;
+        OperatorDatabase op=(OperatorDatabase)o;
+        
+        return o==OperatorDatabase.ADDITION || o==OperatorDatabase.SUBTRACTION || o==OperatorDatabase.MULTIPLICATION || o==OperatorDatabase.MULTIPLICATION_ABBREVIATED_LOW || o==OperatorDatabase.MULTIPLICATION_ABBREVIATED_HIGH || o==OperatorDatabase.DIVISION || o==OperatorDatabase.NEGATION || o==OperatorDatabase.ABSOLUTE || o==OperatorDatabase.SQUARE || o==OperatorDatabase.CUBE;
     }
     
     private boolean isBinaryLeft (Object o)

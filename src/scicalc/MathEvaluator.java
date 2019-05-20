@@ -1,6 +1,7 @@
 package scicalc;
 
 import java.math.BigDecimal;
+import scicalc.Fraction;
 
 public class MathEvaluator
 {
@@ -199,8 +200,66 @@ public class MathEvaluator
         }
         else
         {
-            throw new IllegalArgumentException("Function '" + operator + "' with 2 arguments not found.");
+            throw new IllegalArgumentException("Function '" + operator + "' with 1 arguments not found.");
         }
+    }
+    
+    Fraction evaluateFraction (OperatorDatabase operator, Fraction arg1)
+    {
+        if (operator==OperatorDatabase.NEGATION)
+        {
+            arg1.num*=-1;
+        }
+        else if (operator==OperatorDatabase.ABSOLUTE)
+        {
+            arg1.num=StrictMath.abs(arg1.num);
+        }
+        else if (operator==OperatorDatabase.RECIPROCAL)
+        {
+            int temp=arg1.num;
+            arg1.num=arg1.den;
+            arg1.den=temp;
+        }
+        else if (operator==OperatorDatabase.SQUARE)
+        {
+            arg1.num*=arg1.num;
+            arg1.den*=arg1.den;
+        }
+        else if (operator==OperatorDatabase.CUBE)
+        {
+            arg1.num*=arg1.num*arg1.num;
+            arg1.den*=arg1.den*arg1.den;
+        }
+        else
+        {
+            throw new IllegalArgumentException("Function '" + operator + "' with 1 arguments not found or not supported for fractions.");
+        }
+        return arg1;
+    }
+    
+    Fraction evaluateFraction (OperatorDatabase operator, Fraction arg1, Fraction arg2)
+    {
+        if (operator==OperatorDatabase.ADDITION)
+        {
+            arg1.add(arg2);
+        }
+        else if (operator==OperatorDatabase.SUBTRACTION)
+        {
+            arg1.subtract(arg2);
+        }
+        else if (operator==OperatorDatabase.MULTIPLICATION || operator==OperatorDatabase.MULTIPLICATION_ABBREVIATED_LOW || operator==OperatorDatabase.MULTIPLICATION_ABBREVIATED_HIGH)
+        {
+           arg1.multiply(arg2);
+        }
+        else if (operator==OperatorDatabase.DIVISION)
+        {
+            arg1.divide(arg2);
+        }
+        else
+        {
+            throw new IllegalArgumentException("Function '" + operator + "' with 2 arguments not found or not supported for fractions.");
+        }
+        return arg1;
     }
     
     double evaluate (OperatorDatabase operator, double arg1, double arg2)
@@ -231,7 +290,7 @@ public class MathEvaluator
         }
         else
         {
-            throw new IllegalArgumentException("Function '" + operator + "' with 1 argument not found.");
+            throw new IllegalArgumentException("Function '" + operator + "' with 2 argument not found.");
         }
     }
 }

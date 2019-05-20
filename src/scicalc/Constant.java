@@ -11,13 +11,13 @@ public class Constant extends Operand
     }
     
     @Override
-    double getValue()
+    public double getValue()
     {
         return constant.getValue();
     }
     
     @Override
-    void setValue(double value)
+    public void setValue(double value)
     {
         constant.setValue(value);
     }

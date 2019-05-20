@@ -53,7 +53,7 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
     private ConstantButton euler;
     
     private boolean pressedEquals;
-    private double answer;
+    private Operand answer;
     
     //private JButton;
     
@@ -67,7 +67,7 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
         setLayout(lay);
         
         pressedEquals=false;
-        answer=0;
+        answer=new Operand(0);
         
         printCode=new JButton("print");
         
@@ -344,7 +344,7 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
                 clearField();
                 pressedEquals=false;
             }
-            effectiveString.append("("+Double.toString(answer)+")");
+            effectiveString.append("("+answer.toString()+")");
             field.setText(field.getText()+"Ans");
             field.getCaret().setVisible(true);
         }
@@ -354,17 +354,17 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
             pressedEquals=true;
             try
             {
-                double d=parser.getResult();
-                if (d!=Double.NaN)
+                Operand d=parser.getResult();
+                if (d.getValue() !=Double.NaN)
                 {
                     answer = d;
-                    field.setText(Double.toString(d));
+                    field.setText(d.toString());
                     effectiveString.delete(0, effectiveString.length());
                     effectiveString.append(d);
                 }
                 else
                 {
-                    answer=0;
+                    answer=new Operand(0);
                     field.setText("Math Error");
                     //doesnt work
                 }
@@ -372,7 +372,7 @@ class SuperScientificCalculatorFrame extends JFrame implements ActionListener, F
             catch (Exception ex)
             {
                 field.setText("Syntax Error");
-                answer=0;
+                answer=new Operand(0);
             }
         }
     }

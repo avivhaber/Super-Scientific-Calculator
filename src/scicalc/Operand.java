@@ -14,12 +14,12 @@ public class Operand
         this.value=Double.NaN;
     }
     
-    double getValue ()
+    public double getValue ()
     {
         return value;
     }
     
-    void setValue (double value)
+    public void setValue (double value)
     {
         this.value=value;
     }
